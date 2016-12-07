@@ -1,6 +1,8 @@
 fs = require 'fs'
 path = require 'path'
 nlp = require 'nlp_compromise'
+delay = 1000
+index = 0
 
 loadContent = (name) ->  
   filePath = path.join(__dirname, '../narrative/', name+'.md')
@@ -10,11 +12,38 @@ loadContent = (name) ->
 message = (res, message) -> 
   res.send message
 
+isQuestion = (text) ->
+  text.indexOf('?') > -1
+
+calculateDelay = (text) -> 
+   chunks = nlp.text(text).tags()
+   200 * chunks[0].length
+
+talkLoop = (i, res, text) ->
+    setTimeout(->
+      message(res, text[i].str)
+      delay = calculateDelay(text[i].str)
+      if (i < text.length - 1 && !isQuestion(text[i].str))
+        index += 1
+        talkLoop(i + 1, res, text)       
+    , delay)
+
+messageWithDelay = (res, message, delay) ->
+  setTimeout ( -> 
+        res.send message
+      ), delay
+  
 module.exports = (robot) ->
 
-  robot.hear /#values/i, (res) ->
-    text = loadContent('values')
-    text.map((item) -> message(res, item.str))
+  robot.hear /#(.*)/i, (res) ->
+    text = loadContent(res.match[1])
+    talkLoop(index, res, text)
+
+    
+
+    # text.forEach((item) ->
+    #   setTimeout(message(res, item.str), delay)
+    # )
 
   # robot.respond /open the (.*) doors/i, (res) ->
   #   doorType = res.match[1]
