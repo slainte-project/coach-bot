@@ -4,11 +4,26 @@ nlp = require 'nlp_compromise'
 delay = 1000
 index = 0
 current = ''
+defaultText = nlp.text("Sorry, that session doesn't exist.").sentences
 
 loadContent = (name) ->  
-  filePath = path.join(__dirname, '../narrative/', name+'.md')
-  input = fs.readFileSync(filePath, 'utf8')
-  nlp.text(input).sentences
+  try
+    filePath = path.join(__dirname, '../narrative/', name+'.md')
+    input = fs.readFileSync(filePath, 'utf8')
+    sentences = nlp.text(input).sentences
+  catch Error
+    sentences = defaultText
+  sentences
+
+isValidFile = (name) -> 
+  filePath = path.join(__dirname, '../narrative/')
+  files = fs.readdirSync(filePath)
+  isValid = false
+  if(files.length > 0)
+    for file in files
+      if file.indexOf(name) > -1
+        isValid = true
+  isValid
 
 message = (res, message) -> 
   res.send message
@@ -37,9 +52,13 @@ messageWithDelay = (res, message, delay) ->
 module.exports = (robot) ->
 
   robot.hear /#(.*)/i, (res) ->
-    if(res.match[1] != "next")
-      current = res.match[1]
-      text = loadContent(res.match[1])
+    command = res.match[1]
+    if(command != "next")
+      current = command
+      if(isValidFile(command))
+        text = loadContent(command)
+      else
+        text = defaultText
     else
       text = loadContent(current)
     talkLoop(index, res, text)
