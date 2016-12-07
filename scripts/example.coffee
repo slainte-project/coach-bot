@@ -59,7 +59,6 @@ messageWithDelay = (res, message, delay) ->
   
 module.exports = (robot) ->
 
-  #TODO: fix next at end of file bug
   robot.hear /#(.*)/i, (res) ->
     command = res.match[1]
     if(command != "next" && command != "list")
@@ -74,7 +73,8 @@ module.exports = (robot) ->
       text = nlp.text("Available sessions are "+sessions.join()).sentences
     else
       text = loadContent(current)
-    talkLoop(index, res, text)
+    if(index < text.length)
+      talkLoop(index, res, text)
 
 
   # robot.respond /open the (.*) doors/i, (res) ->
