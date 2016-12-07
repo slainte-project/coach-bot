@@ -25,6 +25,14 @@ isValidFile = (name) ->
         isValid = true
   isValid
 
+listSessions = () -> 
+  filePath = path.join(__dirname, '../narrative/')
+  files = fs.readdirSync(filePath)
+  files.map((file) ->
+    dotIndex = file.length - 3
+    "#"+file.substring(0, dotIndex)
+  )
+
 message = (res, message) -> 
   res.send message
 
@@ -51,23 +59,23 @@ messageWithDelay = (res, message, delay) ->
   
 module.exports = (robot) ->
 
+  #TODO: fix next at end of file bug
   robot.hear /#(.*)/i, (res) ->
     command = res.match[1]
-    if(command != "next")
+    if(command != "next" && command != "list")
       current = command
+      index = 0
       if(isValidFile(command))
         text = loadContent(command)
       else
         text = defaultText
+    else if(command == "list")
+      sessions = listSessions()
+      text = nlp.text("Available sessions are "+sessions.join()).sentences
     else
       text = loadContent(current)
     talkLoop(index, res, text)
 
-    
-
-    # text.forEach((item) ->
-    #   setTimeout(message(res, item.str), delay)
-    # )
 
   # robot.respond /open the (.*) doors/i, (res) ->
   #   doorType = res.match[1]
