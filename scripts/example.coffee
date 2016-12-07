@@ -1,14 +1,20 @@
 fs = require 'fs'
+path = require 'path'
 nlp = require 'nlp_compromise'
-index = 0
 
+loadContent = (name) ->  
+  filePath = path.join(__dirname, '../narrative/', name+'.md')
+  input = fs.readFileSync(filePath, 'utf8')
+  nlp.text(input).sentences
 
-message = (res, message) -> res.send message
+message = (res, message) -> 
+  res.send message
 
 module.exports = (robot) ->
 
   robot.hear /#values/i, (res) ->
-    values.content.map((item) -> message(res, item))
+    text = loadContent('values')
+    text.map((item) -> message(res, item.str))
 
   # robot.respond /open the (.*) doors/i, (res) ->
   #   doorType = res.match[1]
