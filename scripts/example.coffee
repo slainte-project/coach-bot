@@ -3,6 +3,7 @@ path = require 'path'
 nlp = require 'nlp_compromise'
 delay = 1000
 index = 0
+current = ''
 
 loadContent = (name) ->  
   filePath = path.join(__dirname, '../narrative/', name+'.md')
@@ -23,8 +24,8 @@ talkLoop = (i, res, text) ->
     setTimeout(->
       message(res, text[i].str)
       delay = calculateDelay(text[i].str)
+      index += 1
       if (i < text.length - 1 && !isQuestion(text[i].str))
-        index += 1
         talkLoop(i + 1, res, text)       
     , delay)
 
@@ -36,7 +37,11 @@ messageWithDelay = (res, message, delay) ->
 module.exports = (robot) ->
 
   robot.hear /#(.*)/i, (res) ->
-    text = loadContent(res.match[1])
+    if(res.match[1] != "next")
+      current = res.match[1]
+      text = loadContent(res.match[1])
+    else
+      text = loadContent(current)
     talkLoop(index, res, text)
 
     
