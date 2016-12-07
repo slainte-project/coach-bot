@@ -1,12 +1,14 @@
-values = require '../narrative/values.json'
+fs = require 'fs'
+nlp = require 'nlp_compromise'
 index = 0
+
 
 message = (res, message) -> res.send message
 
 module.exports = (robot) ->
 
   robot.hear /#values/i, (res) ->
-    values.content.map((item) -> message(res, item) )
+    values.content.map((item) -> message(res, item))
 
   # robot.respond /open the (.*) doors/i, (res) ->
   #   doorType = res.match[1]
